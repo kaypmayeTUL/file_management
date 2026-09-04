@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File Management Best Practices for the Workplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --tulane-green:#285C4D;
+  --tulane-green-dark:#1B4034;
+  --tulane-green-light:#E8F0ED;
+  --tulane-blue:#71C5E8;
+  --tulane-blue-deep:#2A7FA0;
+  --tulane-gold:#C8973A;
+  --tulane-gold-light:#F5EBD8;
+  --ink:#1F2724;
+  --ink-soft:#4A5551;
+  --paper:#FBFAF7;
+  --rule:#DDE3E0;
+  --serif:'Source Serif 4',Georgia,serif;
+  --sans:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono','Source Code Pro',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+
+/* ---------- Progress ---------- */
+#progress{
+  position:fixed;top:0;left:0;height:3px;width:0%;
+  background:linear-gradient(90deg,var(--tulane-green),var(--tulane-blue));
+  z-index:120;transition:width .3s ease;
+}
+
+/* ---------- Navbar ---------- */
+#navbar{
+  position:fixed;top:0;left:0;right:0;height:56px;
+  background:var(--tulane-green);
+  display:flex;align-items:center;gap:16px;
+  padding:0 20px;z-index:110;
+  box-shadow:0 1px 6px rgba(0,0,0,.18);
+}
+#navbar .brand{
+  font-family:var(--serif);font-weight:600;font-size:1rem;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#navbar .brand span{color:var(--tulane-blue);font-weight:400}
+.nav-spacer{flex:1}
+#slideSelect{
+  font-family:var(--sans);font-size:.82rem;
+  background:var(--tulane-green-dark);color:#fff;
+  border:1px solid rgba(255,255,255,.28);border-radius:4px;
+  padding:7px 10px;max-width:340px;cursor:pointer;
+}
+#slideSelect:focus-visible,.navbtn:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{
+  outline:3px solid var(--tulane-gold);outline-offset:2px;
+}
+.navbtn{
+  background:transparent;border:1px solid rgba(255,255,255,.35);
+  color:#fff;border-radius:4px;width:34px;height:32px;
+  font-size:1rem;cursor:pointer;line-height:1;
+}
+.navbtn:hover{background:rgba(255,255,255,.14)}
+#counter{
+  font-family:var(--mono);font-size:.78rem;color:rgba(255,255,255,.85);
+  min-width:52px;text-align:right;
+}
+
+/* ---------- Slide frame ---------- */
+#deck{
+  position:absolute;top:56px;bottom:0;left:0;right:0;
+  overflow-y:auto;
+}
+.slide{
+  display:none;
+  min-height:100%;
+  padding:46px 6vw 70px;
+  max-width:1180px;margin:0 auto;
+  animation:fade .32s ease;
+}
+.slide.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .slide{animation:none}
+  #progress{transition:none}
+}
+
+.eyebrow{
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--tulane-gold);
+  margin-bottom:12px;
+}
+.slide h2{
+  font-family:var(--serif);font-weight:600;
+  font-size:clamp(1.7rem,3.4vw,2.5rem);
+  line-height:1.15;color:var(--tulane-green);
+  margin-bottom:10px;
+}
+.dek{
+  font-size:1.02rem;color:var(--ink-soft);max-width:62ch;
+  line-height:1.55;margin-bottom:26px;
+}
+.rule{height:2px;background:var(--tulane-blue);width:64px;margin:0 0 24px}
+
+/* ---------- Title slide ---------- */
+.title-slide{
+  display:none;
+}
+.title-slide.active{
+  display:flex;flex-direction:column;justify-content:center;
+  min-height:calc(100vh - 126px);
+}
+.title-kicker{
+  font-family:var(--mono);font-size:.74rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--tulane-gold);margin-bottom:18px;
+}
+.title-slide h1{
+  font-family:var(--serif);font-weight:700;
+  font-size:clamp(2.3rem,6vw,4.1rem);line-height:1.04;
+  color:var(--tulane-green);letter-spacing:-.015em;
+}
+.title-slide h1 em{
+  font-style:italic;color:var(--tulane-gold);
+}
+.title-sub{
+  font-size:1.15rem;color:var(--ink-soft);margin-top:20px;max-width:60ch;line-height:1.5;
+}
+.title-meta{
+  margin-top:38px;padding-top:20px;border-top:2px solid var(--rule);
+  font-size:.9rem;color:var(--ink-soft);line-height:1.8;
+}
+.title-meta strong{color:var(--tulane-green);font-weight:500}
+
+/* ---------- Building blocks ---------- */
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:860px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+.card{
+  background:#fff;border:1px solid var(--rule);border-radius:6px;
+  padding:20px 22px;border-top:3px solid var(--tulane-green);
+}
+.card.blue{border-top-color:var(--tulane-blue-deep)}
+.card.gold{border-top-color:var(--tulane-gold)}
+.card h3{
+  font-family:var(--sans);font-size:.95rem;font-weight:700;
+  color:var(--tulane-green);margin-bottom:8px;letter-spacing:.01em;
+}
+.card p{font-size:.92rem;line-height:1.55;color:var(--ink-soft)}
+.card ul{margin:8px 0 0 18px}
+.card li{font-size:.9rem;line-height:1.5;color:var(--ink-soft);margin-bottom:5px}
+
+.panel{
+  background:var(--tulane-green-light);border-left:4px solid var(--tulane-green);
+  padding:18px 22px;border-radius:0 6px 6px 0;margin-top:22px;
+}
+.panel.gold{background:var(--tulane-gold-light);border-left-color:var(--tulane-gold)}
+.panel h3{font-family:var(--sans);font-size:.88rem;font-weight:700;color:var(--tulane-green);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.panel p,.panel li{font-size:.93rem;line-height:1.6;color:var(--ink-soft)}
+.panel ul{margin-left:18px}
+
+ul.plain{list-style:none;margin:0}
+ul.plain li{
+  position:relative;padding-left:26px;margin-bottom:12px;
+  font-size:1rem;line-height:1.55;color:var(--ink-soft);
+}
+ul.plain li::before{
+  content:'';position:absolute;left:0;top:.55em;
+  width:10px;height:2px;background:var(--tulane-gold);
+}
+ul.plain li strong{color:var(--ink);font-weight:700}
+
+code,.mono{font-family:var(--mono);font-size:.88em}
+code{background:#F0F3F1;padding:2px 6px;border-radius:3px;color:var(--tulane-green-dark)}
+.good{color:#1F6B4E;font-weight:500}
+.bad{color:#A33A2A;font-weight:500}
+.tag{
+  display:inline-block;font-family:var(--mono);font-size:.68rem;
+  letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;
+  background:var(--tulane-green);color:#fff;margin-bottom:10px;
+}
+.tag.gold{background:var(--tulane-gold)}
+.tag.blue{background:var(--tulane-blue-deep)}
+.tag.red{background:#A33A2A}
+
+table{width:100%;border-collapse:collapse;margin-top:6px;background:#fff}
+th{
+  font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;
+  text-align:left;padding:11px 14px;background:var(--tulane-green);color:#fff;font-weight:500;
+}
+td{padding:11px 14px;border-bottom:1px solid var(--rule);font-size:.9rem;color:var(--ink-soft);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.mono{font-family:var(--mono);font-size:.82rem;color:var(--ink)}
+
+.tree{
+  font-family:var(--mono);font-size:.84rem;line-height:1.75;
+  background:#fff;border:1px solid var(--rule);border-radius:6px;
+  padding:18px 20px;color:var(--ink-soft);white-space:pre;overflow-x:auto;
+}
+.tree .lvl0{color:var(--tulane-green);font-weight:700}
+.tree .note{color:var(--tulane-gold)}
+
+/* ---------- Filename builder (signature element) ---------- */
+.builder{
+  background:#fff;border:1px solid var(--rule);border-radius:6px;
+  padding:24px;margin-top:6px;
+}
+.builder-fields{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:860px){.builder-fields{grid-template-columns:1fr 1fr}}
+.field label{
+  display:block;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--tulane-gold);margin-bottom:6px;
+}
+.field input,.field select{
+  width:100%;font-family:var(--sans);font-size:.9rem;
+  padding:9px 10px;border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--ink);
+}
+.output{
+  margin-top:22px;padding:20px;border-radius:6px;
+  background:var(--tulane-green-dark);
+}
+.output .olabel{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--tulane-blue);margin-bottom:10px;
+}
+#filenameOut{
+  font-family:var(--mono);font-size:clamp(.9rem,2.1vw,1.3rem);
+  color:#fff;word-break:break-all;line-height:1.5;
+}
+#builderFlags{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+.flag{
+  font-family:var(--mono);font-size:.7rem;padding:4px 9px;border-radius:3px;
+  background:rgba(255,255,255,.12);color:var(--tulane-blue);
+}
+.flag.warn{background:rgba(200,151,58,.9);color:#221A08}
+.flag.ok{background:rgba(113,197,232,.92);color:#0C2D3A}
+
+/* ---------- Folder designer ---------- */
+#catChips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.chip{
+  font-family:var(--sans);font-size:.82rem;
+  background:#fff;border:1px solid var(--rule);color:var(--ink-soft);
+  border-radius:20px;padding:7px 14px;cursor:pointer;transition:all .15s ease;
+}
+.chip:hover{border-color:var(--tulane-green)}
+.chip.on{background:var(--tulane-green);border-color:var(--tulane-green);color:#fff;font-weight:500}
+.chip.custom{border-style:dashed;border-color:var(--tulane-gold)}
+.chip.custom.on{background:var(--tulane-gold);border-color:var(--tulane-gold);color:#221A08;border-style:solid}
+.chipx{margin-left:8px;font-weight:700;opacity:.65}
+.chipx:hover{opacity:1}
+.addcat{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
+.addcat input[type=text]{
+  font-family:var(--sans);font-size:.85rem;padding:8px 11px;min-width:190px;
+  border:1px dashed var(--tulane-gold);border-radius:20px;background:#fff;color:var(--ink);
+}
+.addcat select{
+  font-family:var(--sans);font-size:.82rem;padding:8px 10px;
+  border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--ink);
+}
+#addCatBtn{
+  font-family:var(--sans);font-size:.8rem;font-weight:500;
+  background:var(--tulane-green);color:#fff;border:none;border-radius:20px;
+  padding:9px 16px;cursor:pointer;
+}
+#addCatBtn:hover{background:var(--tulane-green-dark)}
+.opts{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-top:18px}
+.opt{display:flex;align-items:center;gap:7px;font-size:.85rem;color:var(--ink-soft)}
+.opt input[type=checkbox]{width:16px;height:16px;accent-color:var(--tulane-green)}
+.opt select,.opt input[type=text]{
+  font-family:var(--sans);font-size:.85rem;padding:7px 9px;
+  border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--ink);
+}
+#treeOut{
+  font-family:var(--mono);font-size:.84rem;line-height:1.7;
+  background:var(--tulane-green-dark);color:#fff;
+  border-radius:6px;padding:20px;white-space:pre;overflow-x:auto;margin-top:20px;
+}
+.blabel{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--tulane-gold);
+}
+.secthead{
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  margin:24px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--rule);
+}
+.hintline{font-size:.76rem;color:var(--ink-soft)}
+.hintline strong{font-family:var(--mono);color:var(--tulane-green);font-weight:700}
+.bar{display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+.bar .opt input[type=text]{min-width:170px}
+
+/* --- tree editor rows --- */
+#nodeRows{margin-top:2px}
+.tnode{
+  display:grid;
+  grid-template-columns:34px minmax(120px,1.6fr) 1.1fr .9fr 30px auto;
+  gap:8px;align-items:center;
+  padding:5px 6px 5px calc(6px + var(--d) * 24px);
+  border-bottom:1px solid var(--rule);
+  position:relative;
+}
+.tnode:hover{background:#F7F9F8}
+.tnode::before{
+  content:'';position:absolute;left:calc(var(--d) * 24px);top:0;bottom:0;width:2px;
+  background:var(--tulane-blue);opacity:calc(var(--d) * 0.35);
+}
+.tnode.auto .tname{color:var(--ink-soft);font-style:italic}
+.tlvl{
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;
+  color:var(--tulane-gold);background:var(--tulane-gold-light);
+  border-radius:3px;padding:3px 0;text-align:center;
+}
+.tnode input[type=text],.tnode select{
+  width:100%;font-family:var(--sans);font-size:.84rem;padding:6px 8px;
+  border:1px solid var(--rule);border-radius:4px;background:#fff;color:var(--ink);
+}
+.tnode .tname{font-family:var(--mono);font-size:.81rem}
+.tnode .tfill{font-size:.78rem;color:var(--ink-soft);background:var(--paper)}
+.trest{display:flex;justify-content:center}
+.trest input{width:15px;height:15px;accent-color:var(--tulane-gold)}
+.tacts{display:flex;gap:3px}
+.tacts button{
+  background:#fff;border:1px solid var(--rule);border-radius:3px;
+  width:25px;height:25px;cursor:pointer;color:var(--tulane-green);
+  font-size:.78rem;line-height:1;padding:0;
+}
+.tacts button:hover:not(:disabled){background:var(--tulane-green);color:#fff;border-color:var(--tulane-green)}
+.tacts button[data-act=del]:hover{background:#A33A2A;border-color:#A33A2A}
+.tacts button:disabled{opacity:.28;cursor:default}
+.addroot,.linkbtn{
+  font-family:var(--sans);font-size:.8rem;font-weight:500;
+  background:none;border:1px dashed var(--tulane-green);color:var(--tulane-green);
+  border-radius:4px;padding:8px 14px;cursor:pointer;margin-top:12px;
+}
+.addroot:hover,.linkbtn:hover{background:var(--tulane-green-light)}
+.rowempty{font-size:.86rem;color:var(--ink-soft);padding:10px 0}
+@media(max-width:860px){
+  .tnode{grid-template-columns:30px 1fr auto;row-gap:6px}
+  .tnode .tfill,.tnode .towner,.trest{grid-column:2 / -1}
+}
+#downloadPlan{
+  font-family:var(--sans);font-size:.78rem;font-weight:500;
+  background:#fff;color:var(--tulane-green);border:1px solid var(--tulane-green);
+  border-radius:4px;padding:9px 16px;cursor:pointer;
+}
+#downloadPlan:hover{background:var(--tulane-green-light)}
+#treeNotes{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
+#readmeOut{
+  font-family:var(--mono);font-size:.8rem;line-height:1.65;
+  background:#fff;border:1px solid var(--rule);border-left:3px solid var(--tulane-gold);
+  border-radius:0 6px 6px 0;padding:20px;white-space:pre-wrap;overflow-x:auto;
+  color:var(--ink-soft);margin-top:10px;max-height:46vh;overflow-y:auto;
+}
+#copyReadme{
+  font-family:var(--sans);font-size:.78rem;font-weight:500;
+  background:var(--tulane-green);color:#fff;border:none;border-radius:4px;
+  padding:9px 16px;cursor:pointer;
+}
+#copyReadme:hover{background:var(--tulane-green-dark)}
+.copyrow{margin-top:14px;display:flex;gap:10px;align-items:center}
+#copyTree{
+  font-family:var(--sans);font-size:.78rem;font-weight:500;
+  background:var(--tulane-gold);color:#221A08;border:none;border-radius:4px;
+  padding:9px 16px;cursor:pointer;
+}
+#copyTree:hover{background:#B0842F}
+
+/* ---------- Reveal exercise ---------- */
+.fix-row{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;
+  background:#fff;border:1px solid var(--rule);border-radius:6px;
+  padding:14px 18px;margin-bottom:10px;
+}
+@media(max-width:860px){.fix-row{grid-template-columns:1fr;gap:8px}}
+.fix-row .before{font-family:var(--mono);font-size:.85rem;color:#A33A2A}
+.fix-row .after{font-family:var(--mono);font-size:.85rem;color:#1F6B4E}
+.fix-row .after.hidden{color:var(--rule)}
+.revealbtn{
+  font-family:var(--sans);font-size:.75rem;font-weight:500;letter-spacing:.04em;
+  background:var(--tulane-green);color:#fff;border:none;border-radius:4px;
+  padding:7px 13px;cursor:pointer;white-space:nowrap;
+}
+.revealbtn:hover{background:var(--tulane-green-dark)}
+
+/* ---------- Checklist ---------- */
+.check{
+  display:flex;gap:12px;align-items:flex-start;
+  background:#fff;border:1px solid var(--rule);border-left:3px solid var(--tulane-blue-deep);
+  border-radius:0 5px 5px 0;padding:13px 16px;margin-bottom:9px;
+}
+.check .num{
+  font-family:var(--mono);font-size:.75rem;color:var(--tulane-gold);padding-top:2px;
+}
+.check p{font-size:.93rem;line-height:1.5;color:var(--ink-soft)}
+.check strong{color:var(--ink)}
+
+.footnote{
+  margin-top:28px;font-size:.8rem;color:var(--ink-soft);
+  border-top:1px solid var(--rule);padding-top:12px;
+}
+.hint{
+  position:fixed;bottom:14px;right:18px;z-index:100;
+  font-family:var(--mono);font-size:.68rem;color:#8B9691;
+  background:rgba(251,250,247,.9);padding:4px 8px;border-radius:3px;
+}
+@media(max-width:700px){.hint{display:none}#slideSelect{max-width:150px}}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<nav id="navbar">
+  <div class="brand">File Management <span>· Best Practices for the Workplace</span></div>
+  <div class="nav-spacer"></div>
+  <select id="slideSelect" aria-label="Jump to slide"></select>
+  <button class="navbtn" id="prevBtn" aria-label="Previous slide">&#8249;</button>
+  <button class="navbtn" id="nextBtn" aria-label="Next slide">&#8250;</button>
+  <div id="counter"></div>
+</nav>
+
+<main id="deck">
+
+<!-- 1 -->
+<section class="slide title-slide" data-title="Title">
+  <div class="title-kicker">Team Workshop · Fall 2026</div>
+  <h1>File Management<br><em>Best Practices</em> for the Workplace</h1>
+  <p class="title-sub">Naming, structuring, storing, and retiring the files your colleagues will need to find long after you've forgotten you made them.</p>
+  <div class="title-meta">
+    <strong>Kay P.</strong> · Scholarly Engagement Librarian &amp; Resource and Data Analyst<br>
+    Howard-Tilton Memorial Library, Tulane University<br>
+    kmaye@tulane.edu
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide" data-title="Why this matters">
+  <div class="eyebrow">The problem</div>
+  <h2>The file exists. Nobody can find it.</h2>
+  <div class="rule"></div>
+  <p class="dek">Poor file management rarely destroys anything outright. It just makes work slower, duplicative, and dependent on whoever remembers where things are.</p>
+  <div class="grid g4">
+    <div class="card"><h3>Lost time</h3><p>Searching for, recreating, or re-requesting documents that already exist somewhere on a shared drive.</p></div>
+    <div class="card blue"><h3>Duplicate truth</h3><p>Three versions of the same budget, all slightly different, none clearly current.</p></div>
+    <div class="card gold"><h3>Single points of failure</h3><p>Files that live on one person's desktop leave with that person.</p></div>
+    <div class="card"><h3>Compliance risk</h3><p>Records kept too long, deleted too soon, or shared with the wrong permissions.</p></div>
+  </div>
+  <div class="panel">
+    <h3>The working standard</h3>
+    <p>A colleague who has never seen your project should be able to find the current version of a file, know it's current, and understand what it is — using only the folder path and the filename.</p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide" data-title="What we'll cover">
+  <div class="eyebrow">Roadmap</div>
+  <h2>Six decisions, made once</h2>
+  <div class="rule"></div>
+  <p class="dek">Good file management isn't discipline applied daily — it's a handful of conventions agreed on once, then followed without thinking.</p>
+  <div class="grid g3">
+    <div class="card"><h3>1 · Where files live</h3><p>Choosing storage on purpose instead of by default.</p></div>
+    <div class="card blue"><h3>2 · How folders nest</h3><p>Shallow, predictable structures anyone can navigate.</p></div>
+    <div class="card gold"><h3>3 · How files are named</h3><p>Conventions that sort, scan, and survive.</p></div>
+    <div class="card"><h3>4 · How versions are tracked</h3><p>One current file, an unambiguous history.</p></div>
+    <div class="card blue"><h3>5 · How access is granted</h3><p>Permissions, sensitive data, and sharing.</p></div>
+    <div class="card gold"><h3>6 · How files retire</h3><p>Retention, cleanup, and handoff.</p></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide" data-title="Where files live">
+  <div class="eyebrow">Decision 1</div>
+  <h2>Storage is a decision, not a habit</h2>
+  <div class="rule"></div>
+  <p class="dek">The desktop and the email inbox are where files go when nobody decided where they should go. Match the location to how the file will be used.</p>
+  <table>
+    <thead><tr><th style="width:24%">Location</th><th style="width:38%">Use it for</th><th>Watch out for</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">Team / department site<br>(SharePoint, shared drive)</td><td>Anything more than one person needs, now or later. Team records, procedures, reports, project files.</td><td>Requires an agreed structure — otherwise it becomes a landfill.</td></tr>
+      <tr><td class="mono">Personal cloud drive<br>(OneDrive, Google Drive)</td><td>Drafts in progress, personal working notes, files only you use.</td><td>Departs with the employee. Not a home for team records.</td></tr>
+      <tr><td class="mono">Local desktop / laptop</td><td>Scratch work and temporary downloads.</td><td>Usually unbacked and invisible to everyone else.</td></tr>
+      <tr><td class="mono">Email attachments</td><td>Transmitting a copy. Never storing the original.</td><td>Forks the file into as many versions as recipients.</td></tr>
+      <tr><td class="mono">System of record<br>(HR, finance, CRM, ticketing)</td><td>Data and content the system is designed to hold.</td><td>Keep exports labeled as exports — they're snapshots, not sources.</td></tr>
+    </tbody>
+  </table>
+  <div class="panel gold">
+    <h3>Rule of thumb</h3>
+    <p>If losing the file would create work for anyone besides you, it does not belong in a personal location.</p>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide" data-title="Folder structure">
+  <div class="eyebrow">Decision 2</div>
+  <h2>Broad and shallow beats deep and clever</h2>
+  <div class="rule"></div>
+  <p class="dek">Deep hierarchies hide things. Aim for three or four levels, with top-level folders that match how the work is actually organized — by function or project, not by person or file type.</p>
+  <div class="grid g2">
+    <div>
+      <span class="tag red">Avoid</span>
+      <div class="tree"><span class="lvl0">Shared/</span>
+├── Jordan/
+│   └── stuff/
+│       └── new folder/
+│           └── misc/
+│               └── budget final.xlsx
+├── Documents/
+├── PDFs/
+└── Old files (DO NOT DELETE)/</div>
+      <p style="font-size:.86rem;color:var(--ink-soft);margin-top:10px">Organized by person and format. Unnavigable to anyone else.</p>
+    </div>
+    <div>
+      <span class="tag">Prefer</span>
+      <div class="tree"><span class="lvl0">Operations/</span>
+├── 01_Budget/
+│   ├── FY2026/
+│   └── FY2027/
+├── 02_Reports/
+│   ├── Monthly-Metrics/
+│   └── Annual-Summary/
+├── 03_Projects/
+├── 04_Meetings/
+└── <span class="note">_Archive/</span>       <span class="note">← closed, kept</span></div>
+      <p style="font-size:.86rem;color:var(--ink-soft);margin-top:10px">Organized by function. Numbered prefixes hold sort order.</p>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Three habits that keep structure usable</h3>
+    <ul>
+      <li>Number top-level folders only where order carries meaning; otherwise let them sort alphabetically.</li>
+      <li>Give every folder tree one <code>_Archive</code> or <code>_Closed</code> folder so completed work has somewhere to go besides deletion.</li>
+      <li>Put a short <code>README.txt</code> in shared project folders: what this is, who owns it, what's current.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ACTIVITY A -->
+<section class="slide" data-title="Activity · Map your team's files">
+  <div class="eyebrow">Group activity · 20 minutes</div>
+  <h2>Map your team's files</h2>
+  <div class="rule"></div>
+  <p class="dek">In groups of three or four, from the same team where possible. Work on paper first — the structure matters more than the tool.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Step 1 · Inventory (5 min)</h3>
+      <p>List every kind of file your team creates or receives in a normal month. Kinds, not individual files: budget worksheets, meeting minutes, vendor quotes, training materials, system exports.</p>
+    </div>
+    <div class="card blue">
+      <h3>Step 2 · Group (5 min)</h3>
+      <p>Sort that list into six to nine categories. If a category holds one file, fold it into another. If it holds forty, split it. These become your top level.</p>
+    </div>
+    <div class="card gold">
+      <h3>Step 3 · Nest what needs nesting (5 min)</h3>
+      <p>For each category, decide what the level below it divides by — fiscal year, calendar year, quarter, project, or nothing — and keep going only where the work really is that layered. One pattern per branch, applied consistently.</p>
+    </div>
+    <div class="card">
+      <h3>Step 4 · Assign and test (5 min)</h3>
+      <p>Name an owner per top-level folder. Then test it: pick three real files and say aloud exactly where each one goes. Any hesitation is a flaw in the structure, not the person.</p>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Two questions to settle before you leave the table</h3>
+    <ul>
+      <li>Where does work-in-progress live, and when does it move into the shared structure?</li>
+      <li>Which categories hold restricted material and therefore need their own permissions?</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ACTIVITY B -->
+<section class="slide" data-title="Build your folder structure (interactive)">
+  <div class="eyebrow">Activity &middot; Build it</div>
+  <h2>Build your folder structure</h2>
+  <div class="rule"></div>
+  <p class="dek">Add folders inside folders as deep as your work needs. Rename anything, nest it with the arrows, and auto-fill repeating levels like years or quarters.</p>
+
+  <div class="builder">
+    <div class="bar">
+      <label class="opt">Team or department
+        <input type="text" id="teamName" value="Operations" placeholder="Your team name">
+      </label>
+      <label class="opt">Start from
+        <select id="optTemplate">
+          <option value="ops">Operations team</option>
+          <option value="project">Project-based</option>
+          <option value="client">Client services</option>
+          <option value="blank">Blank</option>
+        </select>
+      </label>
+      <label class="opt">Show as
+        <select id="optOut">
+          <option value="tree">Folder tree</option>
+          <option value="paths">Path list</option>
+          <option value="bash">macOS / Linux commands</option>
+          <option value="ps">Windows PowerShell</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="secthead">
+      <span class="blabel">Your folders</span>
+      <span class="hintline"><strong>+</strong> adds a subfolder &nbsp;&middot;&nbsp; <strong>&larr; &rarr;</strong> change nesting &nbsp;&middot;&nbsp; <strong>Enter</strong> adds another folder below</span>
+    </div>
+    <div id="nodeRows"></div>
+
+    <div class="secthead"><span class="blabel">Conventions</span></div>
+    <div class="opts">
+      <label class="opt">Numbering
+        <select id="optNumber">
+          <option value="none">none</option>
+          <option value="top">top level only</option>
+          <option value="all">every level</option>
+        </select>
+      </label>
+      <label class="opt">Word style
+        <select id="optCase">
+          <option value="hyphen">Hyphen-Case</option>
+          <option value="under">Underscore_Case</option>
+          <option value="camel">CamelCase</option>
+          <option value="lower">lower-case</option>
+        </select>
+      </label>
+      <label class="opt">Years to create
+        <select id="optSpan">
+          <option value="1">1</option>
+          <option value="2" selected>2</option>
+          <option value="3">3</option>
+          <option value="5">5</option>
+        </select>
+      </label>
+      <label class="opt">Fiscal year starts
+        <select id="optFY">
+          <option value="1">January</option>
+          <option value="4">April</option>
+          <option value="7" selected>July</option>
+          <option value="10">October</option>
+        </select>
+      </label>
+      <label class="opt">Archive folder
+        <input type="text" id="optArchive" value="_Archive" maxlength="20" style="width:110px">
+      </label>
+      <label class="opt">README
+        <select id="optReadme">
+          <option value="README.txt" selected>README.txt</option>
+          <option value="README.md">README.md</option>
+          <option value="none">none</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="secthead"><span class="blabel">Result</span></div>
+    <pre id="treeOut"></pre>
+    <div id="treeNotes"></div>
+    <div class="copyrow">
+      <button id="copyTree" type="button">Copy structure</button>
+      <button id="downloadPlan" type="button">Download file plan</button>
+      <span style="font-size:.8rem;color:var(--ink-soft)">Paste it into your file plan, or run the commands to create the folders.</span>
+    </div>
+  </div>
+</section>
+
+<!-- README -->
+<section class="slide" data-title="Write the README">
+  <div class="eyebrow">Make the decisions stick</div>
+  <h2>Write down what you decided</h2>
+  <div class="rule"></div>
+  <p class="dek">A structure lasts about as long as the memory of the meeting that produced it. A README is a plain text file at the top of the folder that tells the next person what the rules are — and, more usefully, why.</p>
+  <div class="grid g3">
+    <div class="card">
+      <h3>What to record</h3>
+      <ul>
+        <li>What this folder is for</li>
+        <li>Where each kind of file goes</li>
+        <li>The naming pattern, with one real example</li>
+        <li>Who owns what</li>
+        <li>Which folders are restricted</li>
+        <li>When things get archived or deleted</li>
+      </ul>
+    </div>
+    <div class="card blue">
+      <h3>Log the decisions, not just the rules</h3>
+      <p>Add a dated line for each choice and the reason behind it. Six months on, that's what stops someone quietly reorganizing everything — or re-litigating a debate you already settled.</p>
+      <p style="margin-top:8px">One line each: date, what was decided, who decided it.</p>
+    </div>
+    <div class="card gold">
+      <h3>Keep it maintainable</h3>
+      <ul>
+        <li>Plain <code>.txt</code> or <code>.md</code> — opens anywhere, forever</li>
+        <li>One screen, not a manual</li>
+        <li>Name it <code>README.txt</code> so it sorts near the top</li>
+        <li>Update the date line whenever a rule changes</li>
+      </ul>
+    </div>
+  </div>
+  <div class="builder" style="margin-top:24px">
+    <p style="font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tulane-gold);margin-bottom:4px">Generated from the structure you just built</p>
+    <pre id="readmeOut"></pre>
+    <div class="copyrow">
+      <button id="copyReadme" type="button">Copy README</button>
+      <span style="font-size:.8rem;color:var(--ink-soft)">Fill in the bracketed fields, save it as README.txt at the top of your folder.</span>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide" data-title="Naming conventions">
+  <div class="eyebrow">Decision 3</div>
+  <h2>A filename is metadata</h2>
+  <div class="rule"></div>
+  <p class="dek">Filenames are the only description most files ever get. Six conventions cover nearly every case.</p>
+  <div class="grid g3">
+    <div class="card"><h3>Lead with what sorts</h3><p>Date first for anything recurring; project code first for anything grouped.</p></div>
+    <div class="card blue"><h3>Use ISO dates</h3><p><code>YYYY-MM-DD</code> or <code>YYYYMMDD</code>. Sorts chronologically and reads the same in every country.</p></div>
+    <div class="card gold"><h3>No spaces</h3><p>Hyphens between words, underscores between elements. Spaces break URLs, scripts, and command lines.</p></div>
+    <div class="card"><h3>Letters, numbers, - and _ only</h3><p>Skip <code>/ \ : * ? " &lt; &gt; | # %</code> and &amp;. They break syncing and cross-platform access.</p></div>
+    <div class="card blue"><h3>Pad your numbers</h3><p><code>v01</code> not <code>v1</code>, <code>03</code> not <code>3</code> — so 10 doesn't sort before 2.</p></div>
+    <div class="card gold"><h3>Keep it under ~60 characters</h3><p>Full paths have limits. Describe, don't narrate.</p></div>
+  </div>
+  <div class="panel">
+    <h3>A pattern that works for most workplace files</h3>
+    <p class="mono" style="font-size:1rem;color:var(--tulane-green-dark);margin-top:4px">YYYY-MM-DD_Project_Content-Description_v01_INITIALS.ext</p>
+    <p style="margin-top:8px">Drop any element you don't need — but keep the order consistent across the folder.</p>
+  </div>
+</section>
+
+<!-- 7 · SIGNATURE INTERACTIVE -->
+<section class="slide" data-title="Filename builder (interactive)">
+  <div class="eyebrow">Try it</div>
+  <h2>Build a filename</h2>
+  <div class="rule"></div>
+  <p class="dek">Type a real file you're working on. The preview applies the conventions and flags what would cause trouble.</p>
+  <div class="builder">
+    <div class="builder-fields">
+      <div class="field">
+        <label for="fDate">Date</label>
+        <input type="date" id="fDate">
+      </div>
+      <div class="field">
+        <label for="fProject">Project or team</label>
+        <input type="text" id="fProject" placeholder="Operations" value="Operations">
+      </div>
+      <div class="field">
+        <label for="fDesc">Description</label>
+        <input type="text" id="fDesc" placeholder="Q3 Vendor Spend Review" value="Q3 Vendor Spend Review">
+      </div>
+      <div class="field">
+        <label for="fVer">Version</label>
+        <select id="fVer">
+          <option value="v01">v01 — first draft</option>
+          <option value="v02">v02</option>
+          <option value="v03">v03</option>
+          <option value="">none</option>
+          <option value="APPROVED">APPROVED</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="fInit">Initials</label>
+        <input type="text" id="fInit" placeholder="JML" value="JML" maxlength="4">
+      </div>
+      <div class="field">
+        <label for="fExt">Format</label>
+        <select id="fExt">
+          <option value="xlsx">.xlsx</option>
+          <option value="csv">.csv</option>
+          <option value="docx">.docx</option>
+          <option value="pdf">.pdf</option>
+          <option value="pptx">.pptx</option>
+          <option value="html">.html</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="fOrder">Sort by</label>
+        <select id="fOrder">
+          <option value="date">Date first</option>
+          <option value="project">Project first</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="fSep">Word separator</label>
+        <select id="fSep">
+          <option value="-">Hyphen</option>
+          <option value="_">Underscore</option>
+          <option value="camel">CamelCase</option>
+        </select>
+      </div>
+    </div>
+    <div class="output">
+      <div class="olabel">Resulting filename</div>
+      <div id="filenameOut">&nbsp;</div>
+      <div id="builderFlags"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="slide" data-title="Rename these files">
+  <div class="eyebrow">Practice</div>
+  <h2>Rename these five</h2>
+  <div class="rule"></div>
+  <p class="dek">Real filenames from real shared drives. Guess the fix, then reveal it.</p>
+  <div id="fixList">
+    <div class="fix-row" data-after="2026-08-14_Onboarding_New-Hire-Orientation_v02_JML.pptx">
+      <div class="before">FINAL final presentation (2) USE THIS ONE.pptx</div>
+      <button class="revealbtn">Reveal</button>
+      <div class="after hidden">••••••••••</div>
+    </div>
+    <div class="fix-row" data-after="2026-07_Budget_Monthly-Spend-Report_v01.xlsx">
+      <div class="before">budget stuff july.xlsx</div>
+      <button class="revealbtn">Reveal</button>
+      <div class="after hidden">••••••••••</div>
+    </div>
+    <div class="fix-row" data-after="2026-03-05_Leadership_Meeting-Minutes_APPROVED.docx">
+      <div class="before">minutes 3/5/26 (draft?).docx</div>
+      <button class="revealbtn">Reveal</button>
+      <div class="after hidden">••••••••••</div>
+    </div>
+    <div class="fix-row" data-after="CRM_Contact-Export_2026-06-30.csv">
+      <div class="before">export (17).csv</div>
+      <button class="revealbtn">Reveal</button>
+      <div class="after hidden">••••••••••</div>
+    </div>
+    <div class="fix-row" data-after="2026-05-12_Survey_Staff-Engagement-Results_v03_RH.xlsx">
+      <div class="before">Copy of Copy of results_new_NEW.xlsx</div>
+      <button class="revealbtn">Reveal</button>
+      <div class="after hidden">••••••••••</div>
+    </div>
+  </div>
+  <div class="panel gold">
+    <h3>What each fix restores</h3>
+    <p>Date, owner, subject, and status — the four things a colleague needs before opening the file to find out what it is.</p>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="slide" data-title="Versions">
+  <div class="eyebrow">Decision 4</div>
+  <h2>&ldquo;FINAL_v2_revised&rdquo; is not a version system</h2>
+  <div class="rule"></div>
+  <p class="dek">Versioning fails when the label describes a feeling instead of a state. Pick one scheme and use its vocabulary literally.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Sequential numbering</h3>
+      <ul>
+        <li><code>v01</code>, <code>v02</code>, <code>v03</code> — every meaningful save</li>
+        <li><code>v02-1</code> for minor edits between drafts</li>
+        <li><code>APPROVED</code> or <code>PUBLISHED</code> replaces the number once signed off</li>
+        <li>Superseded versions move to <code>_Archive</code>, they don't sit alongside the current one</li>
+      </ul>
+    </div>
+    <div class="card blue">
+      <h3>Let the platform do it</h3>
+      <ul>
+        <li>SharePoint, OneDrive, and Google Drive keep version history automatically — one file, full trail</li>
+        <li>Co-author in place instead of emailing copies around</li>
+        <li>Use a version control system for code and scripts, not filename versioning</li>
+        <li>If the platform versions it, don't also version the filename — pick one</li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Name a file owner</h3>
+    <p>For any shared document, one person is responsible for merging edits and declaring which version is current. Versioning schemes fail for social reasons far more often than technical ones.</p>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-title="Formats">
+  <div class="eyebrow">Durability</div>
+  <h2>Choose formats that outlive the software you made them in</h2>
+  <div class="rule"></div>
+  <p class="dek">Working formats are for editing. Durable formats are for the copy that still has to open in ten years.</p>
+  <table>
+    <thead><tr><th style="width:22%">Content</th><th style="width:26%">Work in</th><th style="width:26%">Keep a copy in</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Documents</td><td class="mono">.docx</td><td class="mono">.pdf</td><td>Fixes the layout so it opens the same way anywhere</td></tr>
+      <tr><td>Tabular data</td><td class="mono">.xlsx</td><td class="mono">.csv</td><td>Plain text, no formula or version dependency</td></tr>
+      <tr><td>Images</td><td class="mono">.psd / .ai</td><td class="mono">.tif / .png</td><td>Lossless and widely readable</td></tr>
+      <tr><td>Notes &amp; documentation</td><td class="mono">.docx</td><td class="mono">.txt / .md</td><td>Readable by anything, forever</td></tr>
+      <tr><td>Presentations</td><td class="mono">.pptx / .html</td><td class="mono">.pdf</td><td>Survives missing fonts and links</td></tr>
+    </tbody>
+  </table>
+  <div class="panel gold">
+    <h3>Watch for data loss on export</h3>
+    <p>Saving a spreadsheet as CSV drops formulas, formatting, and every tab but the active one. Keep both files, and name the CSV so it's clear it's an export.</p>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-title="Access & sensitivity">
+  <div class="eyebrow">Decision 5</div>
+  <h2>Permissions are part of the file</h2>
+  <div class="rule"></div>
+  <p class="dek">Sharing settings drift. Files get moved, links get forwarded, staff change roles. Handle sensitivity at the point of saving, not at the point of an incident.</p>
+  <div class="grid g3">
+    <div class="card"><h3>Share the location, not the file</h3><p>Send a link to the file in its home location. Attachments create copies you can't update or revoke.</p></div>
+    <div class="card blue"><h3>Grant the narrowest access that works</h3><p>View rather than edit; named people or groups rather than anyone-with-the-link.</p></div>
+    <div class="card gold"><h3>Separate sensitive material</h3><p>Personnel, customer, contract, and confidential vendor files belong in restricted folders, not mixed into general project folders.</p></div>
+  </div>
+  <div class="panel">
+    <h3>Before you save anything with personal data</h3>
+    <ul>
+      <li>Do you need the identifying columns at all? Strip or hash what you don't need.</li>
+      <li>Does the location's permission set match the data's sensitivity? Check the folder, not just the file.</li>
+      <li>Are vendor data or contract terms covered by an agreement that restricts redistribution?</li>
+      <li>Organizational policy — privacy, HR, legal, and records policy — governs before any convention on these slides does.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="slide" data-title="Backups">
+  <div class="eyebrow">Insurance</div>
+  <h2>Sync is not backup</h2>
+  <div class="rule"></div>
+  <p class="dek">A synced folder faithfully replicates deletions and corruptions. Backup means you can retrieve an earlier state after something goes wrong.</p>
+  <div class="grid g3">
+    <div class="card"><h3>3 copies</h3><p>The working file plus two others — not three names for the same synced folder.</p></div>
+    <div class="card blue"><h3>2 media types</h3><p>Company cloud storage plus a managed server or drive.</p></div>
+    <div class="card gold"><h3>1 off-site</h3><p>Geographically separate. In this region, that condition is not theoretical.</p></div>
+  </div>
+  <div class="panel gold">
+    <h3>Test the restore</h3>
+    <p>An untested backup is an assumption. Once a year, recover one real file from it and confirm it opens.</p>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="slide" data-title="Retention">
+  <div class="eyebrow">Decision 6</div>
+  <h2>Files should retire on schedule</h2>
+  <div class="rule"></div>
+  <p class="dek">Keeping everything forever is a decision with costs: storage, search noise, and legal exposure. Retention converts that decision into policy.</p>
+  <ul class="plain">
+    <li><strong>Know which files are records.</strong> Anything documenting a decision, transaction, or obligation is probably governed by a retention schedule — check before deleting.</li>
+    <li><strong>Distinguish records from working copies.</strong> Drafts, duplicates, and personal notes usually aren't records and can be cleaned up freely.</li>
+    <li><strong>Set a disposition date when you create the folder</strong>, not when it's full. A line in the README is enough.</li>
+    <li><strong>Archive before you delete.</strong> Move completed work to <code>_Archive</code> with a date; delete only what policy allows and nobody needs.</li>
+    <li><strong>Suspend deletion under legal hold or audit.</strong> When notified, retention pauses entirely.</li>
+  </ul>
+  <div class="panel">
+    <h3>Ask before you purge</h3>
+    <p>Retention rules differ by organization and by industry. Confirm with whoever owns records, legal, or compliance rather than deciding locally.</p>
+  </div>
+</section>
+
+<!-- 14 -->
+<section class="slide" data-title="Routine maintenance">
+  <div class="eyebrow">Upkeep</div>
+  <h2>Small routines, not big cleanups</h2>
+  <div class="rule"></div>
+  <p class="dek">Annual file-purge projects fail because they're enormous. These four intervals keep the work small enough to actually happen.</p>
+  <div class="grid g4">
+    <div class="card"><h3>Daily · 2 min</h3><p>Empty the Downloads folder. File or delete anything saved to the desktop.</p></div>
+    <div class="card blue"><h3>Weekly · 10 min</h3><p>Name and file the week's working documents. Archive superseded versions.</p></div>
+    <div class="card gold"><h3>At project close</h3><p>Delete duplicates, mark the final version, write two lines in the README, move to <code>_Archive</code>.</p></div>
+    <div class="card"><h3>Annually · 1 hr</h3><p>Review the top two folder levels. Apply retention. Test one backup restore.</p></div>
+  </div>
+  <div class="panel">
+    <h3>Handoff is the real test</h3>
+    <p>Before someone leaves a role — or before you take leave — the team's files should already be in shared locations, named conventionally, with owners documented. If preparing for a handoff requires a week of file archaeology, the system needs fixing, not the person.</p>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="slide" data-title="Team conventions">
+  <div class="eyebrow">Making it stick</div>
+  <h2>Conventions are a team agreement</h2>
+  <div class="rule"></div>
+  <p class="dek">Individual discipline decays. Written, shared conventions survive turnover — but only if they're short enough to read.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Write a one-page file plan</h3>
+      <ul>
+        <li>Where each category of file lives</li>
+        <li>The naming pattern, with three worked examples</li>
+        <li>Who owns which folders</li>
+        <li>What gets archived, when, and by whom</li>
+      </ul>
+    </div>
+    <div class="card blue">
+      <h3>Lower the cost of compliance</h3>
+      <ul>
+        <li>Set up template folders new projects can be copied from</li>
+        <li>Add the naming pattern to onboarding materials</li>
+        <li>Rename opportunistically — when you open an old file, fix its name</li>
+        <li>Don't retrofit ten years of files; start clean going forward</li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel gold">
+    <h3>Adopt over perfect</h3>
+    <p>A mediocre convention everyone follows beats an elegant one only its author uses. Agree on something, write it down, revisit it in six months.</p>
+  </div>
+</section>
+
+<!-- 16 -->
+<section class="slide" data-title="Checklist">
+  <div class="eyebrow">Take with you</div>
+  <h2>The ten-item checklist</h2>
+  <div class="rule"></div>
+  <div class="grid g2">
+    <div>
+      <div class="check"><span class="num">01</span><p><strong>Shared work lives in shared locations.</strong> Not the desktop, not the inbox.</p></div>
+      <div class="check"><span class="num">02</span><p><strong>Folders are broad and shallow</strong>, organized by function, three to four levels deep.</p></div>
+      <div class="check"><span class="num">03</span><p><strong>Dates are ISO</strong> — <code>YYYY-MM-DD</code>, always.</p></div>
+      <div class="check"><span class="num">04</span><p><strong>No spaces or special characters</strong> in file or folder names.</p></div>
+      <div class="check"><span class="num">05</span><p><strong>Numbers are zero-padded</strong> so they sort correctly.</p></div>
+    </div>
+    <div>
+      <div class="check"><span class="num">06</span><p><strong>One current version</strong>, clearly labeled; superseded copies archived.</p></div>
+      <div class="check"><span class="num">07</span><p><strong>Links, not attachments</strong>, when sharing internally.</p></div>
+      <div class="check"><span class="num">08</span><p><strong>Sensitive files are separated</strong> and permissions checked at the folder level.</p></div>
+      <div class="check"><span class="num">09</span><p><strong>A clean copy exists</strong> in a durable format, backed up 3-2-1.</p></div>
+      <div class="check"><span class="num">10</span><p><strong>Every shared folder has an owner</strong> and a disposition date.</p></div>
+    </div>
+  </div>
+  <div class="footnote">Adopt what your team will actually follow. Start with items 3, 4, and 6 — they deliver most of the benefit for the least effort.</div>
+</section>
+
+<!-- 17 -->
+<section class="slide" data-title="Next steps & contact">
+  <div class="eyebrow">Wrap-up</div>
+  <h2>What to do this week</h2>
+  <div class="rule"></div>
+  <ul class="plain">
+    <li><strong>Pick one folder</strong> you use daily and apply the naming pattern to its contents. Don't start with the biggest one.</li>
+    <li><strong>Move one personal-drive file</strong> that colleagues need into a shared location.</li>
+    <li><strong>Draft your team's one-page file plan</strong> and bring it to your next team meeting for ten minutes of discussion.</li>
+    <li><strong>Check the permissions</strong> on one folder containing sensitive material.</li>
+  </ul>
+  <div class="panel">
+    <h3>Questions and follow-up</h3>
+    <p><strong>Kay P.</strong> · Scholarly Engagement Librarian &amp; Resource and Data Analyst<br>
+    Howard-Tilton Memorial Library, Tulane University · kmaye@tulane.edu</p>
+    <p style="margin-top:8px">Happy to review a team's folder structure or help draft a file plan for your department.</p>
+  </div>
+</section>
+
+</main>
+
+<div class="hint">← → or space to navigate</div>
+
+<script>
+(function(){
+  const slides=[...document.querySelectorAll('.slide')];
+  const sel=document.getElementById('slideSelect');
+  const counter=document.getElementById('counter');
+  const bar=document.getElementById('progress');
+  const deck=document.getElementById('deck');
+  let i=0;
+
+  slides.forEach((s,n)=>{
+    const o=document.createElement('option');
+    o.value=n; o.textContent=(n+1)+'. '+(s.dataset.title||'Slide '+(n+1));
+    sel.appendChild(o);
+  });
+
+  function show(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+    sel.value=i;
+    counter.textContent=(i+1)+' / '+slides.length;
+    bar.style.width=((i)/(slides.length-1)*100)+'%';
+    deck.scrollTop=0;
+    try{ if(location.hash!=='#'+(i+1)) history.replaceState(null,'','#'+(i+1)); }catch(err){}
+  }
+
+  document.getElementById('nextBtn').onclick=()=>show(i+1);
+  document.getElementById('prevBtn').onclick=()=>show(i-1);
+  sel.onchange=e=>show(+e.target.value);
+
+  document.addEventListener('keydown',e=>{
+    const t=e.target.tagName;
+    if(t==='INPUT'||t==='SELECT'||t==='TEXTAREA') return;
+    if(['ArrowRight','PageDown'].includes(e.key)||e.key===' '){e.preventDefault();show(i+1);}
+    else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    else if(e.key==='Home'){e.preventDefault();show(0);}
+    else if(e.key==='End'){e.preventDefault();show(slides.length-1);}
+  });
+
+  let x0=null,y0=null;
+  deck.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY;},{passive:true});
+  deck.addEventListener('touchend',e=>{
+    if(x0===null)return;
+    const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0;
+    if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)) show(dx<0?i+1:i-1);
+    x0=null;y0=null;
+  },{passive:true});
+
+  let start=NaN;
+  try{ start=parseInt(String(location.hash||'').replace('#',''),10); }catch(err){}
+
+  /* ---------- Filename builder ---------- */
+  const ids=['fDate','fProject','fDesc','fVer','fInit','fExt','fOrder','fSep'];
+  const el={}; ids.forEach(id=>el[id]=document.getElementById(id));
+  const out=document.getElementById('filenameOut');
+  const flags=document.getElementById('builderFlags');
+  const today=new Date();
+  el.fDate.value=today.toISOString().slice(0,10);
+
+  function clean(str,sep){
+    let s=(str||'').trim();
+    const hadBad=/[^A-Za-z0-9 \-_]/.test(s);
+    s=s.replace(/[^A-Za-z0-9 \-_]/g,'');
+    if(sep==='camel'){
+      s=s.split(/[\s_\-]+/).filter(Boolean)
+         .map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join('');
+    }else{
+      s=s.replace(/[\s_\-]+/g,sep);
+    }
+    return {text:s,hadBad:hadBad};
+  }
+
+  function render(){
+    const sep=el.fSep.value;
+    const proj=clean(el.fProject.value,sep);
+    const desc=clean(el.fDesc.value,sep);
+    const init=clean(el.fInit.value,sep).text.toUpperCase();
+    const date=el.fDate.value;
+    const ver=el.fVer.value;
+    const parts=[];
+    if(el.fOrder.value==='date'){ if(date)parts.push(date); if(proj.text)parts.push(proj.text); }
+    else { if(proj.text)parts.push(proj.text); if(desc.text)parts.push(desc.text); if(date)parts.push(date); }
+    if(el.fOrder.value==='date'&&desc.text)parts.push(desc.text);
+    if(ver)parts.push(ver);
+    if(init)parts.push(init);
+    const name=parts.join('_')+'.'+el.fExt.value;
+    out.textContent=name;
+
+    const f=[];
+    if(proj.hadBad||desc.hadBad) f.push({t:'Removed characters that break paths',c:'warn'});
+    if(/\s/.test(el.fProject.value+el.fDesc.value)) f.push({t:'Spaces converted to '+(sep==='camel'?'CamelCase':'"'+sep+'"'),c:'ok'});
+    if(name.length>60) f.push({t:name.length+' characters — consider trimming',c:'warn'});
+    else f.push({t:name.length+' characters',c:'ok'});
+    if(!date) f.push({t:'No date — fine for non-recurring files',c:''});
+    if(!ver) f.push({t:'No version — rely on platform history',c:''});
+    if(el.fExt.value==='csv') f.push({t:'CSV drops formulas and extra tabs',c:'warn'});
+    if(ver==='APPROVED') f.push({t:'Archive superseded drafts',c:'warn'});
+    flags.innerHTML=f.map(x=>'<span class="flag '+x.c+'">'+x.t+'</span>').join('');
+  }
+  ids.forEach(id=>{el[id].addEventListener('input',render);el[id].addEventListener('change',render);});
+  render();
+
+  /* ---------- Reveal exercise (delegated) ---------- */
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest?e.target.closest('.revealbtn'):null;
+    if(!btn)return;
+    const row=btn.closest('.fix-row');
+    const after=row.querySelector('.after');
+    if(after.classList.contains('hidden')){
+      after.textContent=row.getAttribute('data-after');
+      after.classList.remove('hidden');
+      btn.textContent='Hide';
+    }else{
+      after.textContent='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+      after.classList.add('hidden');
+      btn.textContent='Reveal';
+    }
+  });
+
+  /* ---------- Folder structure designer (arbitrary depth) ---------- */
+  var uid=0;
+  function node(name,extra){
+    var n={id:'n'+(++uid),name:name,owner:'',restricted:false,children:[]};
+    if(extra)for(var k in extra)n[k]=extra[k];
+    return n;
+  }
+  var TEMPLATES={
+    ops:function(){return [
+      node('Budget',{fill:'fy'}),node('Projects',{fill:'project'}),
+      node('Reports',{fill:'year'}),node('Meetings',{fill:'year'}),
+      node('Policies and Procedures')
+    ];},
+    project:function(){return [
+      node('Active Projects',{fill:'project'}),node('Proposals'),
+      node('Templates'),node('Reference'),node('Reports',{fill:'quarter'})
+    ];},
+    client:function(){return [
+      node('Clients',{fill:'project'}),node('Contracts'),
+      node('Invoicing',{fill:'fy'}),node('Marketing'),
+      node('Personnel',{restricted:true})
+    ];},
+    blank:function(){return [node('New Folder')];}
+  };
+  var tree=TEMPLATES.ops();
+
+  var treeWrap=document.getElementById('nodeRows');
+  var treeOut=document.getElementById('treeOut');
+  var treeNotes=document.getElementById('treeNotes');
+  function $(id){return document.getElementById(id);}
+  function opt(id){var n=$(id);return n?(n.type==='checkbox'?n.checked:n.value):null;}
+
+  /* --- naming --- */
+  function fmt(raw){
+    var style=opt('optCase')||'hyphen';
+    var s=String(raw||'').trim().replace(/&/g,'and').replace(/[^A-Za-z0-9 _-]/g,'');
+    s=s.replace(/[ _-]+/g,' ').trim();
+    if(!s)return '';
+    var w=s.split(' ');
+    if(style==='camel')return w.map(function(x){return x.charAt(0).toUpperCase()+x.slice(1);}).join('');
+    if(style==='under')return w.join('_');
+    if(style==='lower')return w.join('-').toLowerCase();
+    return w.join('-');
+  }
+  function prefix(idx,depth){
+    var st=opt('optNumber')||'none';
+    if(st==='none')return '';
+    if(st==='top'&&depth>0)return '';
+    return ('0'+(idx+1)).slice(-2)+'_';
+  }
+
+  /* --- tree helpers --- */
+  function locate(id,list,parent){
+    list=list||tree;
+    for(var i=0;i<list.length;i++){
+      if(list[i].id===id)return {node:list[i],list:list,index:i,parent:parent||null};
+      var hit=locate(id,list[i].children,list[i]);
+      if(hit)return hit;
+    }
+    return null;
+  }
+  function flatten(list,depth,out){
+    out=out||[];depth=depth||0;
+    (list||tree).forEach(function(n){
+      out.push({n:n,depth:depth});
+      flatten(n.children,depth+1,out);
+    });
+    return out;
+  }
+  function maxDepth(list,d){
+    d=d||1;var m=0;
+    (list||tree).forEach(function(n){
+      m=Math.max(m,n.children.length?maxDepth(n.children,d+1):d);
+    });
+    return m;
+  }
+  function countAll(list){
+    var c=0;
+    (list||tree).forEach(function(n){c+=1+countAll(n.children);});
+    return c;
+  }
+
+  /* --- auto-fill patterns --- */
+  var FILLS={none:'\u2014',fy:'Fiscal years',year:'Calendar years',quarter:'Quarters',
+             month:'Months',project:'Projects A/B/C',stage:'Working / Final',
+             inout:'Received / Sent',docdata:'Documents / Data'};
+  function fillNames(kind){
+    var n=parseInt(opt('optSpan'),10)||2;
+    var fyStart=parseInt(opt('optFY'),10)||7;
+    var now=new Date(),y=now.getFullYear(),out=[],i;
+    var fy=(now.getMonth()+1)>=fyStart?y+1:y;
+    if(kind==='fy'){for(i=0;i<n;i++)out.push('FY'+(fy+i));}
+    else if(kind==='year'){for(i=0;i<n;i++)out.push(String(y-(n-1)+i));}
+    else if(kind==='quarter'){for(i=1;i<=4;i++)out.push(y+'-Q'+i);}
+    else if(kind==='month'){for(i=1;i<=12;i++)out.push(y+'-'+('0'+i).slice(-2));}
+    else if(kind==='project'){out=['Project Name A','Project Name B','Project Name C'];}
+    else if(kind==='stage'){out=['Working','Final'];}
+    else if(kind==='inout'){out=['Received','Sent'];}
+    else if(kind==='docdata'){out=['Documents','Data'];}
+    return out;
+  }
+  function applyFill(n,kind){
+    n.fill=kind;
+    n.children=n.children.filter(function(c){return !c.auto;});
+    if(kind&&kind!=='none'){
+      fillNames(kind).forEach(function(name){
+        n.children.push(node(name,{auto:true}));
+      });
+    }
+  }
+  function refill(list){
+    (list||tree).forEach(function(n){
+      if(n.fill&&n.fill!=='none'){
+        var manual=n.children.filter(function(c){return !c.auto;});
+        n.children=[];
+        applyFill(n,n.fill);
+        n.children=n.children.concat(manual);
+      }
+      refill(n.children);
+    });
+  }
+
+  /* --- row rendering --- */
+  function renderRows(){
+    if(!treeWrap)return;
+    var rows=flatten();
+    if(!rows.length){
+      treeWrap.innerHTML='<p class="rowempty">No folders yet. <button type="button" class="linkbtn" data-act="addroot">Add a top-level folder</button></p>';
+      return;
+    }
+    var html='';
+    rows.forEach(function(r,i){
+      var n=r.n;
+      html+='<div class="tnode'+(n.auto?' auto':'')+'" data-id="'+n.id+'" style="--d:'+r.depth+'">'+
+        '<span class="tlvl">L'+(r.depth+1)+'</span>'+
+        '<input type="text" class="tname" value="'+String(n.name).replace(/"/g,'&quot;')+'" aria-label="Folder name">'+
+        '<select class="tfill" aria-label="Auto-fill subfolders">'+
+          Object.keys(FILLS).map(function(k){
+            return '<option value="'+k+'"'+((n.fill||'none')===k?' selected':'')+'>'+FILLS[k]+'</option>';
+          }).join('')+
+        '</select>'+
+        '<input type="text" class="towner" value="'+String(n.owner||'').replace(/"/g,'&quot;')+'" placeholder="owner" aria-label="Owner">'+
+        '<label class="trest" title="Restricted"><input type="checkbox" class="tres"'+(n.restricted?' checked':'')+'></label>'+
+        '<span class="tacts">'+
+          '<button type="button" data-act="child" title="Add subfolder">+</button>'+
+          '<button type="button" data-act="out" title="Move left"'+(r.depth===0?' disabled':'')+'>\u2190</button>'+
+          '<button type="button" data-act="in" title="Move right">\u2192</button>'+
+          '<button type="button" data-act="up" title="Move up">\u2191</button>'+
+          '<button type="button" data-act="down" title="Move down">\u2193</button>'+
+          '<button type="button" data-act="del" title="Delete folder">\u00D7</button>'+
+        '</span>'+
+      '</div>';
+    });
+    html+='<button type="button" class="addroot" data-act="addroot">+ Add top-level folder</button>';
+    treeWrap.innerHTML=html;
+  }
+
+  if(treeWrap){
+    treeWrap.addEventListener('click',function(e){
+      var btn=e.target.closest('[data-act]');if(!btn)return;
+      var act=btn.getAttribute('data-act');
+      if(act==='addroot'){tree.push(node('New Folder'));renderRows();draw();focusLast();return;}
+      var row=btn.closest('.tnode');if(!row)return;
+      var loc=locate(row.getAttribute('data-id'));if(!loc)return;
+      var n=loc.node,list=loc.list,i=loc.index;
+      if(act==='child'){n.children.push(node('New Subfolder'));}
+      else if(act==='del'){list.splice(i,1);}
+      else if(act==='up'&&i>0){list.splice(i,1);list.splice(i-1,0,n);}
+      else if(act==='down'&&i<list.length-1){list.splice(i,1);list.splice(i+1,0,n);}
+      else if(act==='in'&&i>0){list.splice(i,1);list[i-1].children.push(n);}
+      else if(act==='out'&&loc.parent){
+        var up=locate(loc.parent.id);
+        if(up){list.splice(i,1);up.list.splice(up.index+1,0,n);}
+      }
+      n.auto=false;
+      renderRows();draw();
+    });
+    treeWrap.addEventListener('input',function(e){
+      var row=e.target.closest('.tnode');if(!row)return;
+      var loc=locate(row.getAttribute('data-id'));if(!loc)return;
+      if(e.target.classList.contains('tname')){loc.node.name=e.target.value;loc.node.auto=false;}
+      if(e.target.classList.contains('towner'))loc.node.owner=e.target.value;
+      draw();
+    });
+    treeWrap.addEventListener('change',function(e){
+      var row=e.target.closest('.tnode');if(!row)return;
+      var loc=locate(row.getAttribute('data-id'));if(!loc)return;
+      if(e.target.classList.contains('tfill')){applyFill(loc.node,e.target.value);renderRows();draw();}
+      if(e.target.classList.contains('tres')){loc.node.restricted=e.target.checked;draw();}
+    });
+    treeWrap.addEventListener('keydown',function(e){
+      if(e.key!=='Enter')return;
+      var row=e.target.closest('.tnode');if(!row)return;
+      e.preventDefault();
+      var loc=locate(row.getAttribute('data-id'));if(!loc)return;
+      loc.list.splice(loc.index+1,0,node('New Folder'));
+      renderRows();draw();
+      var rows=treeWrap.querySelectorAll('.tnode');
+      for(var i=0;i<rows.length;i++){
+        if(rows[i].getAttribute('data-id')===loc.list[loc.index+1].id){
+          rows[i].querySelector('.tname').select();break;
+        }
+      }
+    });
+  }
+  function focusLast(){
+    var rows=treeWrap.querySelectorAll('.tnode .tname');
+    if(rows.length)rows[rows.length-1].select();
+  }
+
+  /* --- output --- */
+  function rootName(){return fmt($('teamName')?$('teamName').value:'')||fmt('Team');}
+  function outNodes(){
+    var list=[];
+    var readme=opt('optReadme')||'none';
+    if(readme!=='none')list.push({name:readme,file:true,children:[]});
+    function conv(arr,depth){
+      return arr.map(function(n,i){
+        return {name:prefix(i,depth)+fmt(n.name),restricted:n.restricted,
+                children:conv(n.children,depth+1)};
+      });
+    }
+    list=list.concat(conv(tree,0));
+    var arch=fmt(opt('optArchive'));
+    if(arch)list.push({name:arch.charAt(0)==='_'?arch:'_'+arch,children:[]});
+    return list;
+  }
+  function asTree(nodes){
+    var L=[rootName()+'/'];
+    (function walk(list,pad){
+      list.forEach(function(n,i){
+        var last=(i===list.length-1);
+        L.push(pad+(last?'\u2514\u2500\u2500 ':'\u251C\u2500\u2500 ')+n.name+(n.file?'':'/')+
+               (n.restricted?'   \u2190 restricted':''));
+        if(n.children&&n.children.length)walk(n.children,pad+(last?'    ':'\u2502   '));
+      });
+    })(nodes,'');
+    return L.join('\n');
+  }
+  function paths(nodes,sep){
+    var L=[];
+    (function walk(list,base){
+      list.forEach(function(n){
+        var p=base+sep+n.name;
+        if(n.file){L.push(p);return;}
+        L.push(p+sep);
+        if(n.children&&n.children.length)walk(n.children,p);
+      });
+    })(nodes,rootName());
+    return L;
+  }
+  function renderOutput(nodes){
+    var f=opt('optOut')||'tree';
+    if(f==='paths')return paths(nodes,'/').join('\n');
+    if(f==='bash')return '# Run from the folder that should contain '+rootName()+'\n'+
+      paths(nodes,'/').filter(function(p){return p.slice(-1)==='/';})
+        .map(function(p){return 'mkdir -p "'+p.slice(0,-1)+'"';}).join('\n');
+    if(f==='ps')return '# Run from the folder that should contain '+rootName()+'\n'+
+      paths(nodes,'\\').filter(function(p){return p.slice(-1)==='\\';})
+        .map(function(p){return 'New-Item -ItemType Directory -Force -Path "'+p.slice(0,-1)+'"';}).join('\n');
+    return asTree(nodes);
+  }
+
+  function draw(){
+    if(!treeOut)return;
+    var nodes=outNodes();
+    treeOut.textContent=renderOutput(nodes);
+    var notes=[],depth=maxDepth(),total=countAll();
+    notes.push({t:tree.length+' top level \u00B7 '+total+' folders \u00B7 '+depth+' level'+(depth===1?'':'s')+' deep',w:false});
+    if(!tree.length)notes.push({t:'Add at least one folder',w:true});
+    if(depth>4)notes.push({t:depth+' levels deep \u2014 people stop navigating past about four',w:true});
+    if(tree.length>9)notes.push({t:'More than 9 top level \u2014 consider grouping',w:true});
+    if(tree.some(function(n){return !n.owner;}))notes.push({t:'Some top-level folders have no owner',w:true});
+    if(flatten().some(function(r){return r.n.restricted;}))notes.push({t:'Restricted folders need permissions set before use',w:true});
+    if(!opt('optArchive'))notes.push({t:'No archive folder \u2014 closed work has nowhere to go',w:true});
+    if((opt('optReadme')||'none')==='none')notes.push({t:'No README \u2014 rules undocumented',w:true});
+    treeNotes.innerHTML=notes.map(function(x){
+      return '<span class="flag '+(x.w?'warn':'ok')+'">'+x.t+'</span>';
+    }).join('');
+    drawReadme();
+  }
+
+  ['teamName','optNumber','optCase','optArchive','optReadme','optOut'].forEach(function(id){
+    var n=$(id);
+    if(n){n.addEventListener('input',draw);n.addEventListener('change',draw);}
+  });
+  ['optSpan','optFY'].forEach(function(id){
+    var n=$(id);
+    if(n)n.addEventListener('change',function(){refill();renderRows();draw();});
+  });
+  (function(){
+    var t=$('optTemplate');
+    if(!t)return;
+    t.addEventListener('change',function(){
+      var k=t.value;
+      if(TEMPLATES[k]){tree=TEMPLATES[k]();refill();renderRows();draw();}
+    });
+  })();
+
+  /* --- README --- */
+  function drawReadme(){
+    var box=$('readmeOut');
+    if(!box)return;
+    var d=new Date();
+    var today=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+    var L=[];
+    L.push('README \u2014 '+rootName()+' shared folder');
+    L.push('Last updated: '+today+'   Maintained by: [name, email]');
+    L.push('');
+    L.push('WHAT THIS FOLDER IS');
+    L.push('  [One sentence: whose work lives here and what it covers.]');
+    L.push('');
+    L.push('WHERE THINGS GO');
+    if(!tree.length){L.push('  [No folders defined yet.]');}
+    else{
+      tree.forEach(function(n,i){
+        var kids=n.children.length?'contains '+n.children.length+' subfolder'+(n.children.length===1?'':'s'):'no subfolders';
+        L.push('  '+prefix(i,0)+fmt(n.name)+'/  \u2014 [what belongs here]; '+kids+
+               '. Owner: '+(n.owner?n.owner:'[name]')+(n.restricted?'  (RESTRICTED)':''));
+        n.children.forEach(function(c,j){
+          L.push('      '+prefix(j,1)+fmt(c.name)+'/'+(c.children.length?'  (+'+c.children.length+' below)':'')+
+                 (c.restricted?'  (RESTRICTED)':''));
+        });
+      });
+    }
+    if(opt('optArchive')){
+      var an=fmt(opt('optArchive'));
+      an=an.charAt(0)==='_'?an:'_'+an;
+      L.push('  '+an+'/  \u2014 closed work, kept for reference. Nothing active lives here.');
+    }
+    L.push('  Work in progress stays in [personal drive / drafts folder] until [when it moves here].');
+    L.push('');
+    L.push('HOW WE NAME FILES');
+    L.push('  YYYY-MM-DD_Project_Description_v01_INITIALS.ext');
+    L.push('  Example: '+today+'_'+rootName()+'_Quarterly-Report_v01_ABC.xlsx');
+    L.push('  ISO dates. No spaces or special characters. Zero-padded numbers.');
+    L.push('');
+    L.push('VERSIONS');
+    L.push('  The current version sits at the top of its folder; superseded drafts move to the archive.');
+    L.push('  APPROVED or PUBLISHED replaces the version number once a file is signed off.');
+    L.push('  Version owner for shared documents: [name]');
+    L.push('');
+    L.push('ACCESS');
+    var rest=flatten().filter(function(r){return r.n.restricted;});
+    if(rest.length){
+      L.push('  Restricted: '+rest.map(function(r){return fmt(r.n.name)+'/';}).join(', ')+
+             '. Request access from '+(rest[0].n.owner?rest[0].n.owner:'[name]')+'.');
+    }else{
+      L.push('  [List any restricted folders and who grants access.]');
+    }
+    L.push('  Share links to files here rather than sending attachments.');
+    L.push('');
+    L.push('RETENTION');
+    L.push('  Reviewed every [month]. Disposition: [what gets deleted, and after how long].');
+    L.push('  Check with [records / legal / compliance contact] before deleting anything that is a record.');
+    L.push('');
+    L.push('DECISIONS');
+    L.push('  '+today+'  Organized the top level by function rather than by person. [who decided]');
+    L.push('  '+today+'  '+((opt('optNumber')||'none')==='none'
+      ?'Left folders unnumbered so they sort alphabetically.'
+      :'Numbered folders to lock display order.')+' [who decided]');
+    L.push('  '+today+'  Folder names use '+(opt('optCase')==='camel'?'CamelCase':opt('optCase')==='under'?'underscores':'hyphens')+
+           '; structure is '+maxDepth()+' levels deep. [who decided]');
+    L.push('  [date]      [decision] [who decided]');
+    box.textContent=L.join('\n');
+  }
+
+  refill();renderRows();draw();
+
+  (function(){
+    var dl=$('downloadPlan');
+    if(!dl)return;
+    dl.addEventListener('click',function(){
+      var txt=asTree(outNodes())+'\n\n\n'+($('readmeOut')?$('readmeOut').textContent:'');
+      try{
+        var blob=new Blob([txt],{type:'text/plain'});
+        var a=document.createElement('a');
+        a.href=URL.createObjectURL(blob);
+        a.download=rootName()+'_file-plan.txt';
+        document.body.appendChild(a);a.click();document.body.removeChild(a);
+        setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+      }catch(err){dl.textContent='Download blocked \u2014 use copy';}
+    });
+  })();
+
+  function wireCopy(btnId,srcId,label){
+    const copyBtn=document.getElementById(btnId);
+    const src=document.getElementById(srcId);
+    if(!copyBtn||!src)return;
+    copyBtn.addEventListener('click',function(){
+      const txt=src.textContent;
+      function done(){copyBtn.textContent='Copied';setTimeout(function(){copyBtn.textContent=label;},1600);}
+      function fallback(){
+        const ta=document.createElement('textarea');
+        ta.value=txt;document.body.appendChild(ta);ta.select();
+        try{document.execCommand('copy');done();}catch(e2){copyBtn.textContent='Select and copy';}
+        document.body.removeChild(ta);
+      }
+      try{
+        if(navigator.clipboard&&navigator.clipboard.writeText){
+          navigator.clipboard.writeText(txt).then(done).catch(fallback);
+        }else{fallback();}
+      }catch(err){fallback();}
+    });
+  }
+  wireCopy('copyTree','treeOut','Copy structure');
+  wireCopy('copyReadme','readmeOut','Copy README');
+
+  show(isNaN(start)?0:start-1);
+})();
+</script>
+</body>
+</html>
